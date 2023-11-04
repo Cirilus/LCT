@@ -21,7 +21,7 @@ async def get_binary_video(video: UploadFile = File(...)):
 @router.websocket(
     "/socket"
 )
-async def get_binary_video(websocket: WebSocket):
+async def get_stream_video(websocket: WebSocket):
     await websocket.accept()
 
     while True:
