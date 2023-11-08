@@ -62,7 +62,14 @@ async def get_video(id: uuid.UUID, range: str = Header(None), minio_service: Min
 
     stream = io.BytesIO(result)
 
-    return StreamingResponse(stream, media_type="video/mp4")
+    def generate():
+        while True:
+            chunk = stream.read(end - start)
+            if not chunk:
+                break
+            yield chunk
+
+    return StreamingResponse(generate(), media_type="video/mp4")
 
 
 def streamer(url_rtsp: str):
