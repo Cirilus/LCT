@@ -12,6 +12,7 @@ alembic = "^1.11.3"
 loguru = "^0.7.0"
 pytest = "^7.4.0"
 opencv-python = "^4.8.1.78"
+imutils = "^0.5.4"
 
 
 [build-system]

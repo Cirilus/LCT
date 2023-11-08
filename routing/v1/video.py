@@ -1,11 +1,8 @@
 import io
-import os
-from typing import List
-import cv2
-from fastapi import APIRouter, WebSocket, UploadFile, File, HTTPException, status
+from fastapi import APIRouter, UploadFile, File
 from fastapi.responses import StreamingResponse
-
-
+import time
+import cv2
 
 router = APIRouter(prefix="/api/v1/ml", tags=["company"])
 
@@ -20,28 +17,24 @@ async def get_binary_video(video: UploadFile = File(...)):
     return StreamingResponse(io.BytesIO(video_stream), media_type="video/mp4")
 
 
-@router.websocket(
-    "/rl"
-)
-async def get_stream_video(websocket: WebSocket):
-    # rtsp_url = "rtsp://admin:A1234567@188.170.176.190:8027/Streaming/Channels/101"
-    await websocket.accept()
-
-    rtsp_url = await websocket.receive_text()
-
-    # rtsp_url = "rtsp://admin:A1234567@188.170.176.190:8027/Streaming/Channels/101?transportmode=unicast&profile=Profile_1"
-
-    cap = cv2.VideoCapture(rtsp_url)
-
-    if not cap.isOpened():
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="cannot open the rcp url")
-
+def streamer(url_rtsp: str):
+    cap = cv2.VideoCapture(url_rtsp)
     while True:
+        time.sleep(0.2)
         ret, frame = cap.read()
+
         if not ret:
             break
 
-        ret, buffer = cv2.imencode('.jpg', frame)
-        jpg_as_bytes = io.BytesIO(buffer.tobytes())
-        await websocket.send_bytes(jpg_as_bytes.getvalue())
-        await websocket.receive_text()
+        ret, buffer = cv2.imencode(".jpg", frame)
+
+        if not ret:
+            continue
+
+        yield (b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' +
+               bytearray(buffer) + b'\r\n')
+
+
+@router.get("/rl")
+async def video_feed(url_rtsp: str):
+    return StreamingResponse(streamer(url_rtsp), media_type="multipart/x-mixed-replace;boundary=frame")
