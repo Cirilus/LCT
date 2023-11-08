@@ -2,6 +2,8 @@
 __pycache__
 configs/.env
 
+1.html
+
 .pytest_cache
 configs/.env
 .venv
