@@ -63,6 +63,8 @@ class MinioStorageService:
 
     def create(self, file: Type[MinioStorage], file_stream: io.BytesIO, file_content: bytes) -> Type[MinioStorage]:
         logger.debug("MinioStorage - Service - create")
+        file.id = uuid.uuid4()
+        file.name = f"{str(file.id)}_{file.name}"
 
         minio_client.put_object(
             bucket,
@@ -71,6 +73,5 @@ class MinioStorageService:
             len(file_content)
         )
 
-        file.id = uuid.uuid4()
         result = self.minio_repo.create(file)
         return result

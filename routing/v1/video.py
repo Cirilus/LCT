@@ -7,6 +7,7 @@ import cv2
 from models.MinioStorage import MinioStorage
 from services.Minio import MinioStorageService
 from schemas.Minio import MinioSchema
+from utils.wrappers import error_wrapper
 
 router = APIRouter(prefix="/api/v1/ml", tags=["company"])
 
@@ -25,9 +26,10 @@ async def load_video(video: UploadFile = File(...), minio_service: MinioStorageS
         path="",
     )
 
-    result = minio_service.create(file, video_stream, video_content)
+    result = error_wrapper(minio_service.create, file, video_stream, video_content)
 
     return result.normalize()
+
 
 @router.get(
     "/list",
@@ -35,17 +37,17 @@ async def load_video(video: UploadFile = File(...), minio_service: MinioStorageS
     response_model=list[MinioSchema],
 )
 async def list_file(minio_service: MinioStorageService = Depends()):
-
-    results = minio_service.get_list()
+    results = error_wrapper(minio_service.get_list)
 
     return [result.normalize() for result in results]
+
 
 @router.get(
     "/get",
     description="returning the info about file"
 )
 async def get_file(id: uuid.UUID, minio_service: MinioStorageService = Depends()):
-    result = minio_service.get_by_id(id)
+    result = error_wrapper(minio_service.get_by_id, id)
 
     return result.normalize()
 
