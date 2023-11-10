@@ -7,7 +7,7 @@ import uuid
 
 import ffmpeg_streaming
 from fastapi import Depends
-from ffmpeg_streaming import CloudManager, Formats
+from ffmpeg_streaming import CloudManager, Formats, Representation, Size, Bitrate
 from loguru import logger
 from repositories.Minio import MinioStorageRepository
 from models.MinioStorage import MinioStorage
@@ -98,6 +98,8 @@ class MinioStorageService:
 
             hls = video.hls(Formats.h264())
 
-            hls.auto_generate_representations()
+            _1080p = Representation(Size(1920, 1080), Bitrate(4096 * 1024, 320 * 1024))
+
+            hls.representations(_1080p)
 
             hls.output(clouds=to_minio, async_run=False)
