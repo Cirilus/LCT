@@ -8,6 +8,12 @@ services:
     depends_on:
       db:
         condition: service_healthy
+
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4g
     command: >
       bash -c "poetry run alembic upgrade head && poetry run uvicorn app:app --host 0.0.0.0 --port 8000"
 
@@ -39,6 +45,11 @@ services:
     environment:
       - "MINIO_ROOT_USER=user"
       - "MINIO_ROOT_PASSWORD=password"
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4g
     command: server /data --console-address 0.0.0.0:9001
 
   createbucket:
