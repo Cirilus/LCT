@@ -92,7 +92,7 @@ class MinioStorageService:
             with open(temp_mp4, 'wb') as f:
                 f.write(stream)
 
-            to_minio = CloudManager().add(ffmpeg_minio, bucket_name="static", folder=f"{name}")
+            to_minio = CloudManager().add(ffmpeg_minio, bucket_name="static", folder=f"{name}/")
 
             video = ffmpeg_streaming.input(temp_mp4)
 
