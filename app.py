@@ -8,7 +8,6 @@ from routing.v1.video import router as video_router
 
 from configs.Environment import get_environment_variables
 
-
 app = FastAPI(openapi_url="/core/openapi.json", docs_url="/core/docs")
 
 app.add_middleware(
@@ -18,7 +17,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 env = get_environment_variables()
 

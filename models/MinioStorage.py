@@ -7,8 +7,8 @@ from models.BaseModel import EntityMeta
 class MinioStorage(EntityMeta):
     __tablename__ = "minio_storage"
     id: Mapped[uuid.UUID] = mapped_column(primary_key=True)
-    name: Mapped[str] = mapped_column(unique=True)
-    path: Mapped[str] = mapped_column(unique=False)
+    name: Mapped[str] = mapped_column(unique=False)
+    path: Mapped[str] = mapped_column(unique=True)
 
     def normalize(self):
         return {

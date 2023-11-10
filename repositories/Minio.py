@@ -16,7 +16,7 @@ class MinioStorageRepository:
     def __init__(self, db: Session = Depends(get_db_connection)):
         self.db = db
 
-    def get_list(self) -> list[Type[MinioStorage]]:
+    def get_list(self) -> List[Type[MinioStorage]]:
         logger.debug("Minio - Repository - get_list")
         query = self.db.query(MinioStorage)
         minio_list = query.all()

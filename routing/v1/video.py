@@ -3,6 +3,7 @@ import uuid
 from fastapi import APIRouter, UploadFile, File, Depends, Header
 from fastapi.responses import StreamingResponse
 import cv2
+from typing import List
 
 from models.MinioStorage import MinioStorage
 from services.Minio import MinioStorageService
@@ -26,7 +27,7 @@ async def load_video(video: UploadFile = File(...), minio_service: MinioStorageS
         path="",
     )
 
-    result = error_wrapper(minio_service.create, file, video_stream, video_content)
+    result = await minio_service.create(file, video_stream, video_content)
 
     return result.normalize()
 
@@ -34,7 +35,7 @@ async def load_video(video: UploadFile = File(...), minio_service: MinioStorageS
 @router.get(
     "/list",
     description="returning the list of the files",
-    response_model=list[MinioSchema],
+    response_model=List[MinioSchema],
 )
 async def list_file(minio_service: MinioStorageService = Depends()):
     results = error_wrapper(minio_service.get_list)
@@ -53,25 +54,13 @@ async def get_file(id: uuid.UUID, minio_service: MinioStorageService = Depends()
 
 
 @router.get(
-    "/get_video",
-    description="returning the binary video in mp4 type"
+    "/get_link",
+    description="returning the info about file"
 )
-async def get_video(id: uuid.UUID, range: str = Header(None), minio_service: MinioStorageService = Depends()):
-    result = minio_service.get_file(id)
-    start, end = range.replace("bytes=", "").split("-")
-    start = int(start)
-    end = int(end) if end else start + 1024
+async def get_file(id: uuid.UUID, minio_service: MinioStorageService = Depends()):
+    result = error_wrapper(minio_service.get_link, id)
 
-    stream = io.BytesIO(result)
-
-    def generate():
-        while True:
-            chunk = stream.read(end - start)
-            if not chunk:
-                break
-            yield chunk
-
-    return StreamingResponse(generate(), media_type="video/mp4")
+    return {"url": result}
 
 
 def streamer(url_rtsp: str):
@@ -88,7 +77,7 @@ def streamer(url_rtsp: str):
             continue
 
         yield (b'--frame\r\n' b'Content-Type: image/jpeg\r\n\r\n' +
-               bytearray(buffer) + b'\r\n')
+               buffer.tobytes() + b'\r\n')
 
 
 @router.get("/rl")

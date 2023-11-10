@@ -1,13 +1,20 @@
 import io
-from typing import List, Type
-
+import os
+import tempfile
+from datetime import timedelta
+from typing import Type, List
 import uuid
-from fastapi import Depends, HTTPException
+
+import ffmpeg_streaming
+from fastapi import Depends
+from ffmpeg_streaming import CloudManager, Formats
 from loguru import logger
 from repositories.Minio import MinioStorageRepository
 from models.MinioStorage import MinioStorage
 
-from configs.MinioConfig import minio_client, bucket
+import asyncio
+
+from configs.MinioConfig import minio_client, bucket, ffmpeg_minio
 from minio.error import S3Error
 
 from utils.errors import ErrEntityNotFound
@@ -18,7 +25,7 @@ class MinioStorageService:
                  minio_repo: MinioStorageRepository = Depends()):
         self.minio_repo = minio_repo
 
-    def get_list(self) -> list[Type[MinioStorage]]:
+    def get_list(self) -> List[Type[MinioStorage]]:
         logger.debug("MinioStorage - Service - get_users")
         result = self.minio_repo.get_list()
         return result
@@ -28,12 +35,17 @@ class MinioStorageService:
         result = self.minio_repo.get_by_id(id)
         return result
 
-    def get_file(self, id: uuid.UUID) -> bytes:
-        logger.debug("MinioStorage - Service - get_file")
+    def get_link(self, id: uuid.UUID):
+        logger.debug("MinioStorage - Service - get_link")
         result = self.get_by_id(id)
 
-        file = minio_client.get_object(bucket, result.path + result.name)
-        return file.read()
+        url = minio_client.get_presigned_url(
+            "GET",
+            bucket,
+            result.path,
+            expires=timedelta(days=2)
+        )
+        return url
 
     def check_if_exist(self, id: uuid.UUID):
         logger.debug("MinioStorage - Service - check_if_exist")
@@ -61,17 +73,31 @@ class MinioStorageService:
         self.minio_repo.delete(result)
         return None
 
-    def create(self, file: Type[MinioStorage], file_stream: io.BytesIO, file_content: bytes) -> Type[MinioStorage]:
+    async def create(self, file: Type[MinioStorage], file_stream: io.BytesIO, file_content: bytes) -> Type[
+        MinioStorage]:
         logger.debug("MinioStorage - Service - create")
-        file.id = uuid.uuid4()
-        file.name = f"{str(file.id)}_{file.name}"
 
-        minio_client.put_object(
-            bucket,
-            file.path + file.name,
-            file_stream,
-            len(file_content)
-        )
+        file.id = uuid.uuid4()
+        file.path = f"{str(file.id)}_{file.name}"
+
+        self.mp4_to_hls_minio(file_stream.getvalue(), file.path)
 
         result = self.minio_repo.create(file)
         return result
+
+    def mp4_to_hls_minio(self, stream: bytes, name: str):
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_mp4 = os.path.join(temp_dir, f"{name}")
+
+            with open(temp_mp4, 'wb') as f:
+                f.write(stream)
+
+            to_minio = CloudManager().add(ffmpeg_minio, bucket_name="static", folder=f"{name}")
+
+            video = ffmpeg_streaming.input(temp_mp4)
+
+            hls = video.hls(Formats.h264())
+
+            hls.auto_generate_representations()
+
+            hls.output(clouds=to_minio, async_run=False)
