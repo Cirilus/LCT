@@ -13,7 +13,6 @@ ENV/
 env.bak/
 venv.bak/
 
-ml/best.pt
 ml/test.py
 ml/test.mp4
 
