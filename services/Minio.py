@@ -50,15 +50,16 @@ class MinioStorageService:
         )
         return url
 
-    def check_if_exist(self, id: uuid.UUID):
+    def check_if_exist(self, id: uuid.UUID) -> Type[MinioStorage]:
         logger.debug("MinioStorage - Service - check_if_exist")
         result = self.minio_repo.get_by_id(id)
 
         try:
             minio_client.stat_object(
                 bucket,
-                result.path + result.name
+                f"{result.path}/{result.path}.m3u8",
             )
+            return result
         except S3Error as e:
             if e.code == 'NoSuchKey':
                 raise ErrEntityNotFound("There is no this file in minio")
@@ -76,7 +77,7 @@ class MinioStorageService:
         self.minio_repo.delete(result)
         return None
 
-    def create(self, file: Type[MinioStorage], file_stream: io.BytesIO, file_content: bytes, background_tasks: BackgroundTasks) -> Type[
+    def create(self, file: Type[MinioStorage], file_stream: io.BytesIO, file_content: bytes) -> Type[
         MinioStorage]:
         logger.debug("MinioStorage - Service - create")
 

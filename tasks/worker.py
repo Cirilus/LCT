@@ -7,6 +7,7 @@ import ffmpeg
 from ffmpeg_streaming import S3
 
 from configs.Environment import get_environment_variables
+from configs.Database import get_db_connection
 
 env = get_environment_variables()
 
@@ -25,6 +26,7 @@ minio = S3(
 def mkdir(path):
     if not os.path.exists(path):
         os.makedirs(path)
+
 
 @celery.task
 def mp4_to_hls_minio(stream: bytes, name: str):

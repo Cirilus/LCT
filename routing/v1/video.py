@@ -18,7 +18,8 @@ router = APIRouter(prefix="/api/v1/ml", tags=["company"])
     description="loading the video",
     response_model=MinioSchema
 )
-def load_video(background_tasks: BackgroundTasks, video: UploadFile = File(...), minio_service: MinioStorageService = Depends(), ):
+def load_video(background_tasks: BackgroundTasks, video: UploadFile = File(...),
+               minio_service: MinioStorageService = Depends(), ):
     video_content = video.file.read()
     video.file.seek(0)
     video_stream = io.BytesIO(video_content)
@@ -28,9 +29,19 @@ def load_video(background_tasks: BackgroundTasks, video: UploadFile = File(...),
         path="",
     )
 
-    result = minio_service.create(file, video_stream, video_content, background_tasks)
+    result = minio_service.create(file, video_stream, video_content)
 
     return result.normalize()
+
+
+@router.get(
+    "/check",
+    description="returning the list of the files",
+)
+async def check_if_exist(id: uuid.UUID, minio_service: MinioStorageService = Depends()):
+    file = error_wrapper(minio_service.check_if_exist, id)
+
+    return {"url": f"static/{file.path}/{file.path}.m3u8"}
 
 
 @router.get(
