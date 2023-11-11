@@ -12,3 +12,6 @@ venv/
 ENV/
 env.bak/
 venv.bak/
+
+ml/best.pt
+ml/test1.mp4

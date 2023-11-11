@@ -1,5 +1,7 @@
 import io
 import uuid
+
+import ffmpeg
 from fastapi import APIRouter, UploadFile, File, Depends, BackgroundTasks
 from fastapi.responses import StreamingResponse
 import cv2
@@ -95,3 +97,27 @@ def streamer(url_rtsp: str):
 @router.get("/rl")
 async def video_feed(url_rtsp: str):
     return StreamingResponse(streamer(url_rtsp), media_type="multipart/x-mixed-replace;boundary=frame")
+
+
+@router.get("/rl_hls")
+async def video_feed(url_rtsp: str):
+    ffmpeg_cmd = (
+        ffmpeg.input(url_rtsp, rtsp_transport="tcp")
+        .output("pipe:", format="hls", hls_time=2, hls_list_size=5)
+        .run_async(pipe_stdout=True)
+    )
+
+    async def generate():
+        try:
+            while True:
+                # Read a chunk of data from the FFmpeg process
+                chunk = ffmpeg_cmd.stdout.read(1024)
+                if not chunk:
+                    break
+                yield chunk
+        finally:
+            # Close the FFmpeg process when the streaming ends
+            ffmpeg_cmd.stdout.close()
+            await ffmpeg_cmd.wait()
+
+    return StreamingResponse(generate(), media_type="application/vnd.apple.mpegurl")
