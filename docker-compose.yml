@@ -48,6 +48,9 @@ services:
     container_name: minio
     volumes:
       - static_storage:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
     environment:
       MINIO_ROOT_USER: user
       MINIO_ROOT_PASSWORD: password
@@ -81,8 +84,8 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      - "9000:9000"
-      - "9001:9001"
+      - "9002:9002"
+      - "9003:9003"
 
 volumes:
   postgres_storage:
