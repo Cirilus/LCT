@@ -1,5 +1,6 @@
 import sys
 
+import uvicorn
 from fastapi import FastAPI
 from loguru import logger
 from starlette.middleware.cors import CORSMiddleware
@@ -26,3 +27,6 @@ if not env.DEBUG:
 
 
 app.include_router(video_router)
+
+if __name__ == "__main__":
+    uvicorn.run("app:app", host="127.0.0.1", port=8000, reload=True)

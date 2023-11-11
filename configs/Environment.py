@@ -14,6 +14,7 @@ class EnvironmentSettings(BaseSettings):
     MINIO_HOST: str
     MINIO_ACCESS: str
     MINIO_SECRET: str
+    REDIS_HOST: str
     class Config:
         env_file = "configs/.env"
         env_file_encoding = "utf-8"

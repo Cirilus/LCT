@@ -1,6 +1,6 @@
 import io
 import uuid
-from fastapi import APIRouter, UploadFile, File, Depends, Header
+from fastapi import APIRouter, UploadFile, File, Depends, BackgroundTasks
 from fastapi.responses import StreamingResponse
 import cv2
 from typing import List
@@ -18,8 +18,9 @@ router = APIRouter(prefix="/api/v1/ml", tags=["company"])
     description="loading the video",
     response_model=MinioSchema
 )
-async def load_video(video: UploadFile = File(...), minio_service: MinioStorageService = Depends()):
-    video_content = await video.read()
+def load_video(background_tasks: BackgroundTasks, video: UploadFile = File(...), minio_service: MinioStorageService = Depends(), ):
+    video_content = video.file.read()
+    video.file.seek(0)
     video_stream = io.BytesIO(video_content)
 
     file = MinioStorage(
@@ -27,7 +28,7 @@ async def load_video(video: UploadFile = File(...), minio_service: MinioStorageS
         path="",
     )
 
-    result = await minio_service.create(file, video_stream, video_content)
+    result = minio_service.create(file, video_stream, video_content, background_tasks)
 
     return result.normalize()
 

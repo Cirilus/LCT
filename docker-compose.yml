@@ -11,6 +11,17 @@ services:
     command: >
       bash -c "poetry run alembic upgrade head && poetry run uvicorn app:app --host 0.0.0.0 --port 8000"
 
+  worker:
+    build: .
+    depends_on:
+      - redis
+    command: "poetry run celery -A tasks.worker.worker:celery worker -l info"
+
+  redis:
+    image: redis:7.0.5-alpine
+    ports:
+      - "6379:6379"
+
   db:
     image: postgres:latest
     container_name: db

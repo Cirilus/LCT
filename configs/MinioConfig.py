@@ -14,9 +14,4 @@ minio_client = Minio(
     secure=False
 )
 
-ffmpeg_minio = S3(
-    aws_access_key_id=env.MINIO_ACCESS,
-    aws_secret_access_key=env.MINIO_SECRET,
-    endpoint_url=f"http://{env.MINIO_HOST}"
-)
 
