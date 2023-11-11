@@ -13,4 +13,6 @@ def detect(video_path):
     height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
     fps = cap.get(cv2.CAP_PROP_FPS)
 
-    out = cv2.VideoWriter(save_path, fourcc, fps, (width, height))
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    out = cv2.VideoWriter("test/test.mp4", fourcc, fps, (width, height))
+
