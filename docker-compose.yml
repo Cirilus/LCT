@@ -46,18 +46,11 @@ services:
   minio:
     image: minio/minio:latest
     container_name: minio
-    ports:
-      - "9000:9000"
-      - "9001:9001"
     volumes:
       - static_storage:/data
-      - /etc/letsencrypt:/etc/letsencrypt
     environment:
       MINIO_ROOT_USER: user
       MINIO_ROOT_PASSWORD: password
-      MINIO_ACCESS_KEY: /etc/letsencrypt/live/89.232.165.248.sslip.io/fullchain.pem
-      MINIO_SECRET_KEY: /etc/letsencrypt/live/89.232.165.248.sslip.io/privkey.pem
-      MINIO_BROWSER_REDIRECT_URL: https://89.232.165.248.sslip.io
     command: server /data --console-address :9001
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
@@ -88,6 +81,8 @@ services:
     ports:
       - "80:80"
       - "443:443"
+      - "9000:9000"
+      - "9001:9001"
 
 volumes:
   postgres_storage:
