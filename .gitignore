@@ -14,4 +14,7 @@ env.bak/
 venv.bak/
 
 ml/best.pt
-ml/test1.mp4
+ml/test.py
+ml/test.mp4
+
+tasks/test1.mp4

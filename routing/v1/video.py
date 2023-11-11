@@ -31,7 +31,7 @@ def load_video(background_tasks: BackgroundTasks, video: UploadFile = File(...),
         path="",
     )
 
-    result = minio_service.create(file, video_stream, video_content)
+    result = minio_service.create(file, video_stream, video_content, background_tasks)
 
     return result.normalize()
 
