@@ -24,13 +24,13 @@ class MinioStorageRepository:
 
     def get_by_id(self, id: uuid.UUID) -> Type[MinioStorage]:
         logger.debug("MinioStorage - Repository - get_by_id")
-        history = self.db.get(
+        file = self.db.get(
             MinioStorage,
             id
         )
-        if history is None:
+        if file is None:
             raise ErrEntityNotFound("error entity not found")
-        return history
+        return file
 
     def create(self, file: Type[MinioStorage]) -> Type[MinioStorage]:
         logger.debug("MinioStorage - Repository - create")
