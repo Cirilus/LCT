@@ -55,6 +55,8 @@ services:
     environment:
       MINIO_ROOT_USER: user
       MINIO_ROOT_PASSWORD: password
+      MINIO_ACCESS_KEY: /etc/letsencrypt/live/89.232.165.248.sslip.io/fullchain.pem;
+      MINIO_SECRET_KEY: /etc/letsencrypt/live/89.232.165.248.sslip.io/privkey.pem;
       MINIO_BROWSER_REDIRECT_URL: https://89.232.165.248.sslip.io
     command: server /data --console-address :9001
     healthcheck:
