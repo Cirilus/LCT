@@ -11,6 +11,7 @@ from models.MinioStorage import MinioStorage
 from services.Minio import MinioStorageService
 from schemas.Minio import MinioSchema
 from utils.wrappers import error_wrapper
+from ml.model import model
 
 router = APIRouter(prefix="/api/v1/ml", tags=["company"])
 
@@ -85,6 +86,8 @@ def streamer(url_rtsp: str):
         if not ret:
             break
 
+        model.predict(source=frame, stream=True)
+
         ret, buffer = cv2.imencode(".jpg", frame)
 
         if not ret:
@@ -110,13 +113,13 @@ async def video_feed(url_rtsp: str):
     async def generate():
         try:
             while True:
-                # Read a chunk of data from the FFmpeg process
+
                 chunk = ffmpeg_cmd.stdout.read(1024)
                 if not chunk:
                     break
                 yield chunk
         finally:
-            # Close the FFmpeg process when the streaming ends
+
             ffmpeg_cmd.stdout.close()
             await ffmpeg_cmd.wait()
 
