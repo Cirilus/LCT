@@ -52,10 +52,11 @@ services:
     volumes:
       - static_storage:/data
       - /etc/letsencrypt:/etc/letsencrypt
+    extra_hosts:
+      - "https://89.232.165.248.sslip.io:9000"
     environment:
       - "MINIO_ROOT_USER=user"
       - "MINIO_ROOT_PASSWORD=password"
-      - "MINIO_SERVER_URL=https://89.232.165.248.sslip.io:9000"
     command: server /data --console-address :9001
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:9000/minio/health/live" ]
