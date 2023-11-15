@@ -21,7 +21,7 @@ router = APIRouter(prefix="/api/v1/ml", tags=["company"])
     description="loading the video",
     response_model=MinioSchema
 )
-def load_video(background_tasks: BackgroundTasks, video: UploadFile = File(...),
+async def load_video(background_tasks: BackgroundTasks, video: UploadFile = File(...),
                minio_service: MinioStorageService = Depends(), ):
     video_content = video.file.read()
     video.file.seek(0)
@@ -32,7 +32,7 @@ def load_video(background_tasks: BackgroundTasks, video: UploadFile = File(...),
         path="",
     )
 
-    result = minio_service.create(file, video_stream, video_content, background_tasks)
+    result = await minio_service.create(file, video_stream, video_content, background_tasks)
 
     return result.normalize()
 

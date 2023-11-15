@@ -77,14 +77,16 @@ class MinioStorageService:
         self.minio_repo.delete(result)
         return None
 
-    def create(self, file: Type[MinioStorage], file_stream: io.BytesIO, file_content: bytes, background_tasks: BackgroundTasks) -> Type[
+    async def create(self, file: Type[MinioStorage], file_stream: io.BytesIO, file_content: bytes, background_tasks: BackgroundTasks) -> Type[
         MinioStorage]:
         logger.debug("MinioStorage - Service - create")
 
         file.id = uuid.uuid4()
         file.path = f"{str(file.id)}_{file.name}"
 
-        background_tasks.add_task(mp4_to_hls_minio,file_content, file.path)
+        # background_tasks.add_task(mp4_to_hls_minio,file_content, file.path)
+        mp4_to_hls_minio.delay(file_content, file.path)
+
         result = self.minio_repo.create(file)
         return result
 

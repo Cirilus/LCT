@@ -1,3 +1,4 @@
+import multiprocessing
 import os
 import tempfile
 import boto3
@@ -25,13 +26,12 @@ minio = S3(
     config=boto3.session.Config(signature_version='s3v4'),
 )
 
-
 def mkdir(path):
     if not os.path.exists(path):
         os.makedirs(path)
 
 
-# @celery.task
+@celery.task
 def mp4_to_hls_minio(stream: bytes, name: str):
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_mp4 = os.path.join(temp_dir, f"{name}")
@@ -49,7 +49,7 @@ def mp4_to_hls_minio(stream: bytes, name: str):
             f.write(stream)
 
         logger.debug("predicting")
-        logger.debug(model.predict(source=temp_mp4, project=temp_dir, save=True))
+        model.predict(source=temp_mp4, project=temp_dir, save=True)
 
         logger.debug("converting")
         logger.debug(temp_avi)
