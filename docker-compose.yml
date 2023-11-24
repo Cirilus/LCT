@@ -19,7 +19,7 @@ services:
     build: .
     depends_on:
       - redis
-    command: "poetry run celery -A tasks.worker:celery worker -l info"
+    command: "poetry run celery -A tasks.worker:celery worker -l info --pool gevent"
 
   redis:
     image: redis:7.0.5-alpine
