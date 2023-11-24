@@ -64,6 +64,7 @@ class MinioStorageService:
             if e.code == 'NoSuchKey':
                 raise ErrEntityNotFound("There is no this file in minio")
 
+
     def delete(self, id: uuid.UUID) -> None:
         logger.debug("MinioStorage - Service - delete_user")
 

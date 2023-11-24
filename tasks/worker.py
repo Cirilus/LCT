@@ -49,7 +49,7 @@ def mp4_to_hls_minio(stream: bytes, name: str):
             f.write(stream)
 
         logger.debug("predicting")
-        model.predict(source=temp_mp4, project=temp_dir, save=True)
+        model.predict(source=temp_mp4, project=temp_dir, save=True, conf=0.65)
 
         logger.debug("converting")
         logger.debug(temp_avi)

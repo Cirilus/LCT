@@ -1,6 +1,9 @@
 up:
 	poetry run uvicorn app:app --reload --port 8000
 
+local-up:
+	docker compose up minio redis createbucket db
+
 worker-up:
 	poetry run celery -A tasks.worker:celery worker -l info --pool gevent
 
